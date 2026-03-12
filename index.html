@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
+h
   :root {
     --bg: #0a0a0a;
     --surface: #141414;
@@ -644,7 +644,7 @@ document.addEventListener('click',e=>{
 function parseDashboardTab(rows){
   if(!rows||rows.length<11) return null;
   const r={dataAnalisada:rows[2]?(rows[2][1]||''):'',vendors:[],totalHoje:0,totalMensal:0};
-  for(let i=3;i<=6;i++){const row=rows[i];if(!row)continue;const nome=(row[7]||'').trim();if(!nome)continue;
+  for(let i=3;i<=7;i++){const row=rows[i];if(!row)continue;const nome=(row[7]||'').trim();if(!nome)continue;
     r.vendors.push({nome,vendasHoje:pVal(row[8]),metaDiaria:pVal(row[9]),gapDiario:pVal(row[10]),vendasMes:pVal(row[11]),gapAcumulado:pVal(row[12])});}
   if(rows[9])r.totalHoje=pVal(rows[9][8]);
   if(rows[10])r.totalMensal=pVal(rows[10][8]);
