@@ -965,7 +965,7 @@ function updateConnectionStatus(status) {
   badge.className = 'tv-live';
   if (status === 'live') {
     badge.textContent = 'LIVE';
-    badge.classList.add(''); // default green
+    /* default green (bug fix: removed classList.add with empty token) */
     DOM.connDot.className = 'dot ok';
     DOM.connLabel.textContent = 'Conectado';
   } else if (status === 'error') {
