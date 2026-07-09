@@ -787,8 +787,8 @@
 <!-- MODE 1 -->
 <div class="view-mode1" id="view1">
   <div class="m1-kpis">
-    <div class="m1-kpi"><div class="m1-kpi-label">Vendas Hoje</div><div class="m1-kpi-value" id="m1kH" style="color:var(--green)">R$ 0,00</div><div class="m1-kpi-sub" id="m1kHs">0 vendas</div></div>
-    <div class="m1-kpi"><div class="m1-kpi-label">Vendas Mes</div><div class="m1-kpi-value" id="m1kM" style="color:var(--accent)">R$ 0,00</div><div class="m1-kpi-sub" id="m1kMs">--</div></div>
+    <div class="m1-kpi"><div class="m1-kpi-label">Vendas Mês</div><div class="m1-kpi-value" id="m1kH" style="color:var(--green)">R$ 0,00</div><div class="m1-kpi-sub" id="m1kHs">0 vendas</div></div>
+   
     <div class="m1-kpi"><div class="m1-kpi-label">Meta Diaria</div><div class="m1-kpi-value" id="m1kMt">R$ 0,00</div><div class="m1-kpi-sub" id="m1kMts">--</div><div class="kpi-progress"><div class="kpi-progress-bar" id="m1kProgress" style="width:0%"></div></div></div>
   </div>
   <div class="m1-race" id="m1tracks"></div>
@@ -800,7 +800,7 @@
   <div class="m2-bottom">
     <div class="m2-kpis-feed">
       <div class="m2-kpi-row">
-        <div class="m2-kpi"><div class="m2-kpi-label">Vendas Hoje</div><div class="m2-kpi-val" id="m2kH" style="color:var(--green)">R$ 0</div></div>
+        <div class="m2-kpi"><div class="m2-kpi-label">Vendas Mês</div><div class="m2-kpi-val" id="m2kH" style="color:var(--green)">R$ 0</div></div>
         <div class="m2-kpi"><div class="m2-kpi-label">Meta Diaria</div><div class="m2-kpi-val" id="m2kMt">R$ 0</div></div>
         <div class="m2-kpi"><div class="m2-kpi-label">Gap</div><div class="m2-kpi-val" id="m2kG" style="color:var(--red)">R$ 0</div></div>
       </div>
@@ -1436,7 +1436,7 @@ function buildModeBars(prefix, data) {
 function buildM4KPIs(tH, tM, meta, gap, qH, qM) {
   const pct = meta > 0 ? (tH/meta*100).toFixed(0) : 0;
   DOM.m4kpis.innerHTML = `
-    <div class="m4-kpi-big"><div class="m4-kpi-big-label">Vendas Hoje</div><div class="m4-kpi-big-val" style="color:var(--green)">${fmt(tH)}</div><div class="m4-kpi-big-sub">${qH} vendas</div></div>
+    <div class="m4-kpi-big"><div class="m4-kpi-big-label">Vendas Mês</div><div class="m4-kpi-big-val" style="color:var(--green)">${fmt(tH)}</div><div class="m4-kpi-big-sub">${qH} vendas</div></div>
     <div class="m4-kpi-big"><div class="m4-kpi-big-label">Meta Diaria</div><div class="m4-kpi-big-val">${fmt(meta)}</div><div class="m4-kpi-big-sub">${pct}% atingido</div></div>
     <div class="m4-kpi-big"><div class="m4-kpi-big-label">Vendas no Mes</div><div class="m4-kpi-big-val" style="color:var(--accent)">${fmt(tM)}</div><div class="m4-kpi-big-sub">${qM} vendas</div></div>`;
 }
