@@ -11,7 +11,7 @@
      FLUXO VIVO — sem cards, sem molduras. A tela inteira é uma única
      camada contínua: um gráfico ao vivo desenhado em canvas por trás,
      números flutuando por cima sem caixa nenhuma. Hierarquia vem de
-     tamanho, posição e cor — não de borda.p
+     tamanho, posição e cor — não de borda.
      ============================== */
   :root {
     --bg: #060608;
@@ -215,6 +215,20 @@
     opacity:0; transition:all 0.25s ease; pointer-events:none;
   }
   .toast.show { opacity:1; transform:translate(-50%,0); }
+
+  /* Aviso de venda do Funil Direto — mesmo tom de pílula do toast, mas
+     discreto (cor neutra, sem brilho, sem bounce): é um aviso, não uma
+     comemoração. A festa fica só para vendas do time cadastrado. */
+  .direct-notif {
+    position:fixed; top:72px; left:50%; transform:translate(-50%,-12px); z-index:480;
+    display:flex; align-items:baseline; gap:10px;
+    font-family:'IBM Plex Mono',monospace; font-weight:600;
+    color:var(--bg); background:var(--fg-dim); padding:9px 20px; border-radius:99px;
+    opacity:0; transition:all 0.35s ease; pointer-events:none;
+  }
+  .direct-notif.show { opacity:1; transform:translate(-50%,0); }
+  .direct-notif-label { font-size:0.72rem; letter-spacing:0.6px; text-transform:uppercase; font-style:italic; }
+  .direct-notif-value { font-size:0.92rem; font-weight:800; }
 
   .loader {
     display:none; position:fixed; inset:0; z-index:900; background:var(--bg);
@@ -423,6 +437,10 @@
       </div>
     </div>
     <div class="event-row">
+      <div class="event-name"><span class="event-dot" style="background:var(--fg-dim)"></span>Funil direto</div>
+      <span class="event-pending">som de assobio, aviso sem comemoração</span>
+    </div>
+    <div class="event-row">
       <div class="event-name"><span class="event-dot" style="background:var(--fg-faint)"></span>Carrinho abandonado</div>
       <span class="event-pending">planilha não recebe esse dado</span>
     </div>
@@ -434,7 +452,10 @@
       <div class="event-name"><span class="event-dot" style="background:var(--fg-faint)"></span>Cartão recusado</div>
       <span class="event-pending">planilha não recebe esse dado</span>
     </div>
-    <button class="drawer-btn" style="margin-top:14px" onclick="testNotification()">Testar notificação</button>
+    <div class="drawer-row" style="margin-top:14px">
+      <button class="drawer-btn" onclick="testNotification()">Testar venda do time</button>
+      <button class="drawer-btn" onclick="testDirectNotification()">Testar funil direto</button>
+    </div>
   </div>
 </aside>
 
@@ -444,6 +465,13 @@
   <div class="burst-vendor" id="burstVendor"></div>
   <div class="burst-value" id="burstValue"></div>
   <div class="burst-title" id="burstTitle"></div>
+</div>
+
+<!-- Venda do Funil Direto: avisa, mas sem comemoração — sem emoji, sem
+     brilho, sem confete. Só o time cadastrado ganha a festa. -->
+<div class="direct-notif" id="directNotif">
+  <span class="direct-notif-label">Funil direto</span>
+  <span class="direct-notif-value" id="directNotifValue">R$ 0,00</span>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -457,26 +485,26 @@
 // BRUTOS). Só a apresentação abaixo é nova.
 // ================================================================
 const State = {
-  vendors: ['BIA','JOAO VICTOR','JARDEL','DUDA'],
+  vendors: ['BIA','JOAO VICTOR','JARDEL','MARCELO','DUDA'],
   nameMap: {
     'BIA':'BIA',
     'JARDEL':'JARDEL',
-    'JOAO VICTOR':'JOAO VICTOR',
+    'JOAO VICTOR':'JOAO VICTOR','JOÃO VICTOR':'JOAO VICTOR',
+    'MARCELO':'MARCELO',
     'DUDA':'DUDA'
-   
-    
   },
-  displayNames: { 'BIA':'Bia','JOAO VICTOR':'Joao Victor','JARDEL':'Jardel','DUDA':'Duda' },
+  displayNames: { 'BIA':'Bia','JOAO VICTOR':'Joao Victor','JARDEL':'Jardel','MARCELO':'Marcelo','DUDA':'Mª Eduardha' },
   colors: {
-    'BIA':     '#3ec6ff',
+    'BIA':         '#3ec6ff',
     'JOAO VICTOR': '#b785f7',
     'JARDEL':      '#ff5f96',
+    'MARCELO':     '#ff8a4c',
     'DUDA':        '#22ff00'
-  
   },
   rawData: [],
   dashData: null,
   prevTotals: {},
+  prevUnidTotal: 0,
   bonusFlags: {},
   isConnected: false,
   errorCount: 0,
@@ -569,7 +597,8 @@ function cacheDOM() {
    'heroValue','heroPct','heroCount','statMeta','statMonth','lanes','funnelBands',
    'sheetId','apiKey','metaDiaria','refreshInterval','soundEnabled','soundPack','popupEnabled',
    'toast','loader','loaderMsg','offlineBanner',
-   'burstFlash','burst','burstEmoji','burstVendor','burstValue','burstTitle'
+   'burstFlash','burst','burstEmoji','burstVendor','burstValue','burstTitle',
+   'directNotif','directNotifValue'
   ].forEach(id => DOM[id] = document.getElementById(id));
 }
 
@@ -797,9 +826,11 @@ function refresh() {
   today.forEach(s => todayTotals.set(s.vendedor, (todayTotals.get(s.vendedor) || 0) + s.valor));
   State.todayCounts = todayCounts;
 
-  // "Vendas hoje" é o que os colaboradores venderam — não inclui vendas
-  // sem vendedor identificado na planilha (essas aparecem à parte, na
-  // faixa "Funil direto", mas não entram na meta nem no total do time).
+  // "Vendas hoje" é o que os colaboradores CADASTRADOS venderam — não
+  // inclui vendas de nomes fora da lista oficial (essas aparecem à parte,
+  // na faixa "Funil direto"). Não detecta vendedor novo sozinho: um nome
+  // só entra no ranking depois de ser cadastrado de propósito, pra não
+  // confundir com outras UTMs que existem no projeto.
   const known = new Set(State.vendors);
   let unidValor = 0, unidQtd = 0;
   todayTotals.forEach((valor, nome) => { if (!known.has(nome)) unidValor += valor; });
@@ -807,7 +838,7 @@ function refresh() {
   const todayKnownCount = today.length - unidQtd;
 
   const tH = today.reduce((s,d) => s + d.valor, 0) - unidValor;
-  // "Vendas no mês" também é só o time — mesma regra do "vendas hoje".
+  // "Vendas no mês" também é só o time cadastrado — mesma regra do "vendas hoje".
   const monthKnown = month.filter(s => known.has(s.vendedor));
   const tM = monthKnown.reduce((s,d) => s + d.valor, 0);
   const pctMeta = meta > 0 ? (tH / meta * 100) : 0;
@@ -872,6 +903,23 @@ function getCelebrationSound(kind) {
     } catch { celebSoundCache[kind] = null; }
   }
   return celebSoundCache[kind];
+}
+
+// Som próprio pro Funil Direto — um assobio suave, bem diferente da
+// sirene/buzina das comemorações do time: avisa sem comemorar.
+let whistleSoundCache = null;
+function playWhistleSound() {
+  if (whistleSoundCache === null) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      whistleSoundCache = () => {
+        const now = ctx.currentTime;
+        tone(ctx, {type:'sine', freq:800, freqEnd:1400, start:now, dur:0.28, peak:0.09});
+        tone(ctx, {type:'sine', freq:1400, freqEnd:1100, start:now + 0.26, dur:0.2, peak:0.07});
+      };
+    } catch { whistleSoundCache = false; }
+  }
+  if (whistleSoundCache) whistleSoundCache();
 }
 
 const MEME_LIBRARY = [
@@ -946,6 +994,28 @@ function processNotifQueue() {
   }, 5000);
 }
 function testNotification() { showSaleNotification('BIA', 1500, 4); }
+
+// Venda do Funil Direto: avisa (som + pop-up), mas sem meme, sem brilho,
+// sem confete — fila própria, independente da comemoração do time.
+let directNotifQueue = [], directNotifShowing = false;
+function showDirectSaleNotification(value) {
+  if (DOM.popupEnabled.value === '0') return;
+  directNotifQueue.push(value);
+  if (!directNotifShowing) processDirectNotifQueue();
+}
+function processDirectNotifQueue() {
+  if (!directNotifQueue.length) { directNotifShowing = false; return; }
+  directNotifShowing = true;
+  const value = directNotifQueue.shift();
+  DOM.directNotifValue.textContent = fmt(value);
+  DOM.directNotif.classList.add('show');
+  if (DOM.soundEnabled.value === '1') playWhistleSound();
+  setTimeout(() => {
+    DOM.directNotif.classList.remove('show');
+    setTimeout(processDirectNotifQueue, 300);
+  }, 3500);
+}
+function testDirectNotification() { showDirectSaleNotification(240); }
 
 // ================================================================
 // DADOS — Google Sheets API v4, mesmo contrato (abas DASHBOARD e
@@ -1034,6 +1104,14 @@ function computeTodayTotals() {
   State.rawData.filter(d => isToday(d.data)).forEach(s => totals.set(s.vendedor, (totals.get(s.vendedor) || 0) + s.valor));
   return totals;
 }
+// Soma de hoje que NÃO é de um vendedor cadastrado — o mesmo "Funil
+// Direto" que aparece na pista tracejada do ranking.
+function computeUnidTotal() {
+  const known = new Set(State.vendors);
+  let unidValor = 0;
+  computeTodayTotals().forEach((valor, nome) => { if (!known.has(nome)) unidValor += valor; });
+  return unidValor;
+}
 function detectNewSales() {
   if (!State.dashData) return;
   const totals = computeTodayTotals();
@@ -1049,6 +1127,11 @@ function detectNewSales() {
     }
     State.prevTotals[v.nome] = atual;
   });
+
+  const unidAtual = computeUnidTotal();
+  const unidPrev = State.prevUnidTotal || 0;
+  if (unidAtual > unidPrev) showDirectSaleNotification(unidAtual - unidPrev);
+  State.prevUnidTotal = unidAtual;
 }
 async function connectAndStart(showFullLoader) {
   const sid = DOM.sheetId.value.trim(), key = DOM.apiKey.value.trim();
@@ -1066,6 +1149,7 @@ async function connectAndStart(showFullLoader) {
     // celebração (senão, toda venda já feita hoje dispararia de uma vez).
     const baseline = computeTodayTotals();
     State.vendors.forEach(nome => { State.prevTotals[nome] = baseline.get(nome) || 0; });
+    State.prevUnidTotal = computeUnidTotal();
     startAutoRefresh();
   }
 }
