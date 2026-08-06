@@ -342,6 +342,57 @@
   @media (prefers-reduced-motion: reduce) {
     .lane-marker, .funnel-band, .burst, .burst-emoji, .burst-flash, .loader-ring { animation:none !important; transition:none !important; }
   }
+
+  /* ==============================
+     MOBILE — só entra abaixo de 780px. Não toca em nenhuma regra acima:
+     a versão desktop/TV continua exatamente como está. A pista de corrida
+     não cabe numa tela estreita do jeito que é no desktop (nome + linha +
+     valor lado a lado) — aqui ela quebra em duas linhas por vendedor:
+     nome/valor em cima, a linha da pista embaixo, ocupando a largura toda.
+     ============================== */
+  @media (max-width: 780px) {
+    .topbar { flex-wrap:wrap; row-gap:8px; }
+    .brand { letter-spacing:1.6px; }
+    .topbar-clock { font-size:0.68rem; }
+
+    .hero-block { flex-direction:column; align-items:stretch; gap:22px; }
+    .side-stats { flex-direction:row; justify-content:space-between; text-align:left; }
+
+    .hero-value { font-size:clamp(2rem, 10vw, 3rem); }
+
+    .stage { gap:clamp(16px, 3vh, 28px); }
+
+    .lane { flex-wrap:wrap; row-gap:8px; }
+    .lane-info {
+      width:auto; flex:1 1 auto; min-width:0; order:1;
+      justify-content:space-between; gap:8px;
+    }
+    .lane-name {
+      min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:46%;
+    }
+    .lane-value, .lane-qtd { white-space:nowrap; flex-shrink:0; }
+    .lane-line { order:2; flex-basis:100%; margin-left:34px; }
+    /* "Funil direto" tem uma descrição bem mais longa que "N vendas" —
+       não pode ficar nowrap/sem-encolher igual às outras linhas, senão
+       empurra o nome pra largura zero. Essa quebra pra linha própria. */
+    .lane-unid .lane-info { flex-wrap:wrap; row-gap:2px; }
+    .lane-unid .lane-qtd { white-space:normal; flex-shrink:1; flex-basis:100%; order:3; }
+
+    .track-zone, .funnel-zone { padding:0 clamp(20px, 5vw, 32px); }
+    /* No desktop as duas zonas dividem o espaço meio a meio porque cada
+       linha tem altura previsível. No mobile a linha "Funil direto" pode
+       quebrar em 2 linhas de texto — se as zonas continuarem 50/50 fixo,
+       o ranking cresce mais que o espaço reservado e invade o funil.
+       Aqui o ranking ocupa só o que precisa; o funil pega o resto. */
+    .track-zone { flex:0 1 auto; padding-bottom:18px; }
+    .funnel-zone { flex:1 1 0; min-height:120px; overflow-y:auto; }
+
+    .funnel-band-label { font-size:clamp(0.8rem, 3.6vw, 0.98rem); }
+    .funnel-band-value { font-size:clamp(0.72rem, 3vw, 0.85rem); }
+
+    .direct-notif { top:64px; max-width:88vw; }
+    .burst { max-width:92vw; }
+  }
 </style>
 </head>
 <body>
