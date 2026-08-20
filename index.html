@@ -32,10 +32,10 @@
   html, body { height:100%; overflow:hidden; }
   body {
     background:var(--bg); color:var(--fg);
-    /* Sem fonte de emoji explícita no fim da lista, símbolos como ⚙/⤢/✕ e
-       os emoji da comemoração viram um quadrado vazio em sistemas que não
-       têm -apple-system (Windows, Android, TVs) — essas fontes garantem
-       o desenho certo em qualquer aparelho, não só no Mac. */
+    /* Sem fonte de emoji explícita no fim da lista, os emoji da comemoração
+       de venda viram um quadrado vazio em sistemas sem -apple-system
+       (Windows, Linux, Android, TVs) — essas fontes garantem o desenho
+       certo em qualquer aparelho, não só no Mac. */
     font-family:'Inter', -apple-system, "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
     -webkit-font-smoothing:antialiased;
   }
@@ -72,10 +72,14 @@
   @keyframes blink { 50% { opacity:0.25; } }
   .icon-btn {
     width:34px; height:34px; border-radius:50%; background:none; border:1px solid var(--line);
-    color:var(--fg-dim); font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    color:var(--fg-dim); cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition:border-color 0.15s ease, color 0.15s ease;
-    font-family:-apple-system, "Segoe UI Symbol", "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
   }
+  /* SVG embutido em vez de caractere de fonte — ⚙/⤢/✕ dependiam de fonte de
+     símbolo instalada no sistema (falhava em Linux/Windows sem a fonte
+     certa, virava quadrado vazio). Vetor desenhado renderiza igual em
+     qualquer aparelho, sem depender de fonte nenhuma. */
+  .icon-btn svg { width:16px; height:16px; }
   .icon-btn:hover { border-color:var(--accent); color:var(--accent); }
   .icon-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
@@ -411,8 +415,8 @@
     <span class="topbar-clock" id="clock">--:--</span>
     <div class="topbar-actions">
       <button class="live-pill" id="livePill"><span class="dot"></span><span id="liveLabel">conectando</span></button>
-      <button class="icon-btn" id="fullscreenBtn" title="Tela cheia" aria-label="Tela cheia">⤢</button>
-      <button class="icon-btn" id="drawerBtn" title="Configurações" aria-label="Configurações">⚙</button>
+      <button class="icon-btn" id="fullscreenBtn" title="Tela cheia" aria-label="Tela cheia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <button class="icon-btn" id="drawerBtn" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </div>
 
@@ -455,7 +459,7 @@
 <aside class="drawer" id="drawer" aria-label="Configurações">
   <div class="drawer-header">
     <span class="drawer-title">Configurações</span>
-    <button class="icon-btn" id="drawerCloseBtn" aria-label="Fechar">✕</button>
+    <button class="icon-btn" id="drawerCloseBtn" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
 
   <div class="drawer-section">
